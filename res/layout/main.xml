@@ -64,11 +64,12 @@
                 android:layout_height="20px"
                 />
     </LinearLayout>
-    <Button
+    <ImageButton
             android:layout_width="140dp"
             android:layout_height="wrap_content"
-            android:text="Add"
-            android:id="@+id/addValueToDaily" android:layout_gravity="center_horizontal"/>
+            android:text="@string/Add"
+            android:id="@+id/addValueToDaily" android:layout_gravity="center_horizontal"
+            android:background="@android:color/transparent"/>
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"

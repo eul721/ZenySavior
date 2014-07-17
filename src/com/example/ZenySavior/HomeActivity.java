@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
@@ -45,7 +46,10 @@ public class HomeActivity extends Activity {
 
         initLimitsOfNumberPickers();
         //[Add] Button
-        ((Button)findViewById(R.id.addValueToDaily)).setOnClickListener(new View.OnClickListener() {
+        ImageButton addButton = ((ImageButton)findViewById(R.id.addValueToDaily));
+
+        addButton.setImageResource(R.drawable.ic_addbutton);
+        addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 testWidget(view);
