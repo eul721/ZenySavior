@@ -2,6 +2,7 @@ package com.example.ZenySavior;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
@@ -47,7 +48,7 @@ public class HomeActivity extends Activity {
         ((Button)findViewById(R.id.addValueToDaily)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                testWidget(view);
             }
         });
 
@@ -61,6 +62,10 @@ public class HomeActivity extends Activity {
             picker.setMinValue(0);
             picker.setMaxValue(9);
         }
+    }
+
+    private void testWidget(View widgetView){
+        Log.d("Testing Widget","Currently testing " + widgetView.toString());
     }
 
 }
