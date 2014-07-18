@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:text="@string/Add"
             android:id="@+id/addValueToDaily" android:layout_gravity="center_horizontal"
-            android:background="@android:color/transparent"/>
+            android:background="@drawable/addvaluetodaily"/>
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"

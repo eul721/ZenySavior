@@ -48,7 +48,7 @@ public class HomeActivity extends Activity {
         //[Add] Button
         ImageButton addButton = ((ImageButton)findViewById(R.id.addValueToDaily));
 
-        addButton.setImageResource(R.drawable.ic_addbutton);
+        
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
