@@ -38,6 +38,7 @@ public class HomeActivity extends Activity {
         ImageButton addButton = ((ImageButton)findViewById(R.id.addValueToDaily));
 
         //Initializes month
+
         Date curTime = Calendar.getInstance().getTime();
         String dateFormat = new SimpleDateFormat("yyyy/MM/dd").format(curTime);
         ((TextView)findViewById(R.id.dateLabel)).setText(
@@ -55,6 +56,10 @@ public class HomeActivity extends Activity {
         monthlySpendingsLabel.setText("This Month's Spendings: $0.00");
 
 
+        //get DB
+        final DataHelper dataHelper = new DataHelper(this.getBaseContext());
+
+        dataHelper.debugGetAllRows();
 
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -66,7 +71,14 @@ public class HomeActivity extends Activity {
                 * Else
                 *   Modify entry
                 * */
-                dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(getInputValue()).setScale(2,BigDecimal.ROUND_UP).toString());
+                Date curTime = Calendar.getInstance().getTime();
+                 double providedVal = BigDecimal.valueOf(getInputValue()).setScale(2, BigDecimal.ROUND_UP).doubleValue();
+                try{
+                    dataHelper.insertValueForDate(curTime,providedVal);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(getInputValue()).setScale(2, BigDecimal.ROUND_UP).toString());
 
             }
         });
