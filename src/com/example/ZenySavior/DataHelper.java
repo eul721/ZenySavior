@@ -9,11 +9,17 @@ import android.util.Log;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.math.BigDecimal;
 import java.util.*;
+
+/**
+ * TODO: CHANGE ALL HARDCODED MONTH OFFSETS TO ARBITRARY IDENTIFIER COMPARISON
+ */
 
 /**
  * Created by Jacky on 7/19/14.
  * This class is a helper class that provides DB transaction helper functions
+ * Also provides date computations
  */
 public class DataHelper extends SQLiteOpenHelper{
     private static final int DB_VERSION = 3;
@@ -28,8 +34,18 @@ public class DataHelper extends SQLiteOpenHelper{
                     " )";
     //private final int N_COLUMNS = 5; //Number of cols in Table
 
+    private static String KEY_ID = "id";
+    private static String KEY_YEAR = "year";
+    private static String KEY_MONTH= "month";
+    private static String KEY_DATE = "date";
+    private static String KEY_SPENT_VALUE = "spentValue";
+
+
+
+
 
     public DataHelper(Context context){
+
         super(context,"ZenySaviorDB",null,DB_VERSION);
     }
 
@@ -45,36 +61,115 @@ public class DataHelper extends SQLiteOpenHelper{
     }
 
 
-    //Used to search and determine whether a value already exists for a date
-    public double searchValueForDate(final Date inputDate){
 
+    private Cursor retrieveCursorForSearches(final Date inputDate){
         String[] strForms = retrieveSeperateStringsPerDate(inputDate);
-        String query = "SELECT spendValue FROM " + DB_TABLE_NAME +
+        String query = "SELECT * FROM " + DB_TABLE_NAME +
                 " WHERE year=? AND month=? AND date=?";
-        Cursor cursor = this.getReadableDatabase().rawQuery(query,strForms);
-        //SHOULD ONLY RETURN ONE ROW
-        assert cursor.getCount()==1;
-        cursor.moveToFirst();
-        return cursor.getDouble(cursor.getColumnIndex("spentValue"));
 
 
+        return this.getReadableDatabase().rawQuery(query,strForms);
+    }
+
+    private Cursor retrieveCursorForCurMonthSearches(final int year, final int month){
+        String query = "SELECT * FROM " + DB_TABLE_NAME +
+                " WHERE year=? AND month=?";
+
+        return this.getReadableDatabase().rawQuery(query,new String[]{String.valueOf(year),String.valueOf(month)});
+    }
+
+    //Used to search and determine whether a value already exists for a date
+    private boolean searchIfValueExistsForDate(final Date inputDate){
+
+        return retrieveCursorForSearches(inputDate).getCount()>0;
+    }
+
+    private DataTableRow searchRowForDate(final Date inputDate){
+        Cursor searchCursor = retrieveCursorForSearches(inputDate);
+        assert searchCursor.getCount() == 1;
+        searchCursor.moveToFirst();
+
+        return new DataTableRow( //construct a tablerow obj from the search
+                searchCursor.getInt(searchCursor.getColumnIndex(KEY_ID)),
+                searchCursor.getInt(searchCursor.getColumnIndex(KEY_YEAR)),
+                searchCursor.getInt(searchCursor.getColumnIndex(KEY_MONTH)),
+                searchCursor.getInt(searchCursor.getColumnIndex(KEY_DATE)),
+                searchCursor.getDouble(searchCursor.getColumnIndex(KEY_SPENT_VALUE)));
+    }
+
+    public double searchValueForDate(final Date inputDate){
+        double val;
+        if(searchIfValueExistsForDate(inputDate)){
+            DataTableRow dateRow = searchRowForDate(inputDate);
+            val = dateRow.getspentValue();
+        }else{
+            val = 0.0;
+        }
+        return BigDecimal.valueOf(val).setScale(2, BigDecimal.ROUND_UP).doubleValue();
 
     }
 
-    public boolean insertValueForDate(final Date inputDate, final double value) throws Exception{
+    public double getSumForMonth(final Date inputDate){
+        Calendar calInstance = Calendar.getInstance();
+        calInstance.setTime(inputDate);
+        final int year = calInstance.get(Calendar.YEAR);
+        final int month = calInstance.get(Calendar.MONTH)+1;
+        Cursor resultCursor = retrieveCursorForCurMonthSearches(year,month);
+        double sum = 0.00;
+        if(resultCursor.getCount()>0){
+            resultCursor.moveToFirst();
+            do{
+                sum += resultCursor.getDouble(resultCursor.getColumnIndex(KEY_SPENT_VALUE));
+            }while(resultCursor.moveToNext());
+        }else{
+            return 0.00;
+        }
+
+        return sum;
+
+    }
+
+
+    /**
+     * This method updates a certain date with the provided value
+     * @param inputDate - the provided date
+     * @param value - the provided value. Can be negative
+     * @return sum of the values
+     */
+    private double updateValueForDate(final Date inputDate, final double value){
+        DataTableRow rowForDate = searchRowForDate(inputDate);
+        double sum = rowForDate.getspentValue() + value;
+        ContentValues values = new ContentValues();
+        values.put("spentValue",sum);
+        this.getWritableDatabase().update(DB_TABLE_NAME,values,KEY_ID + "=?",new String[]{String.valueOf(rowForDate.getId())});
+        return sum;
+    }
+
+    public double insertValueForDate(final Date inputDate, final double value) throws Exception{
         //Todo: If already have value for date, update instead
-        int[] intForms = retrieveSeperateIntsPerDate(inputDate);
-        ContentValues newDay = new ContentValues();
-        newDay.put("year",intForms[0]);
-        newDay.put("month",intForms[1]+1);
-        newDay.put("date",intForms[2]);
-        newDay.put("spentValue",value);
-        try {
-            this.getWritableDatabase().insert(DB_TABLE_NAME, null, newDay);
-            return true;
-        }catch(Exception e){
-            e.printStackTrace();
-            throw e;
+        if(searchIfValueExistsForDate(inputDate)){
+            try {
+                return updateValueForDate(inputDate, value);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+                throw e;
+            }
+        }
+        else {
+            int[] intForms = retrieveSeperateIntsPerDate(inputDate);
+            ContentValues newDay = new ContentValues();
+            newDay.put("year", intForms[0]);
+            newDay.put("month", intForms[1]);
+            newDay.put("date", intForms[2]);
+            newDay.put("spentValue", value);
+            try {
+                this.getWritableDatabase().insert(DB_TABLE_NAME, null, newDay);
+                return value;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
         }
     }
 
@@ -85,7 +180,7 @@ public class DataHelper extends SQLiteOpenHelper{
     private int[] retrieveSeperateIntsPerDate(final Date inputDate){
         Calendar cal = Calendar.getInstance();
         cal.setTime(inputDate);
-        return new int[]{cal.get(Calendar.YEAR),cal.get(Calendar.MONTH),cal.get(Calendar.DATE)};
+        return new int[]{cal.get(Calendar.YEAR),cal.get(Calendar.MONTH)+1,cal.get(Calendar.DATE)};
     }
 
     public ArrayList<DataTableRow> getAllRows(){
@@ -94,20 +189,21 @@ public class DataHelper extends SQLiteOpenHelper{
         ArrayList<DataTableRow> tableRows = new ArrayList<DataTableRow>();
 
         cursor.moveToFirst();
-        do{
-            final int id = cursor.getInt(cursor.getColumnIndex("id"));
-            final int year = cursor.getInt(cursor.getColumnIndex("year"));
-            final int month = cursor.getInt(cursor.getColumnIndex("month"));
-            final int date = cursor.getInt(cursor.getColumnIndex("date"));
-            final double spentValue = cursor.getDouble(cursor.getColumnIndex("spentValue"));
-            tableRows.add(new DataTableRow(id,year,month,date,spentValue));
-        }while(cursor.moveToNext());
-
+        if(cursor.getCount()>0) {
+            do {
+                final int id = cursor.getInt(cursor.getColumnIndex("id"));
+                final int year = cursor.getInt(cursor.getColumnIndex("year"));
+                final int month = cursor.getInt(cursor.getColumnIndex("month"));
+                final int date = cursor.getInt(cursor.getColumnIndex("date"));
+                final double spentValue = cursor.getDouble(cursor.getColumnIndex("spentValue"));
+                tableRows.add(new DataTableRow(id, year, month, date, spentValue));
+            } while (cursor.moveToNext());
+        }
         return tableRows;
     }
 
     public String[] getColumnIndexes(){
-        return new String[]{"id","year","month","date","spentValue"};
+        return new String[]{KEY_ID,KEY_YEAR,KEY_MONTH,KEY_DATE,KEY_SPENT_VALUE};
     }
 
     public ArrayList<TableRow> getAllRowsInTableRowArrayList(Context context){
