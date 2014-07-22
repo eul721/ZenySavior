@@ -2,11 +2,8 @@ package com.example.ZenySavior;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.NumberPicker;
-import android.widget.TextView;
+import android.widget.*;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -15,8 +12,8 @@ import java.util.*;
 public class HomeActivity extends Activity {
 
     //consts
-    private final int N_DIGITS = 6;
-    private final double MAXIMUM_FACTOR = 1000;
+    //private final int N_DIGITS = 6; //Limiting how many digits
+    private final double MAXIMUM_FACTOR = 1000; //Multiplier factor
 
 
     private List<NumberPicker> numberPickers = new ArrayList<NumberPicker>();
@@ -35,7 +32,8 @@ public class HomeActivity extends Activity {
         initNumberPickers();
         //[Add] Button
         //The resource has been added to the xml
-        ImageButton addButton = ((ImageButton)findViewById(R.id.addValueToDaily));
+        ImageButton addButton = (ImageButton)findViewById(R.id.addValueToDaily);
+        final Button debugButton = (Button)findViewById(R.id.debugButton);
 
         //Initializes month
 
@@ -83,6 +81,17 @@ public class HomeActivity extends Activity {
             }
         });
 
+        debugButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DebugWindow debugWindow = new DebugWindow();
+                debugWindow.show(getFragmentManager(),"dialog");
+
+
+
+            }
+        });
+
 
 
     }
@@ -105,6 +114,9 @@ public class HomeActivity extends Activity {
         }
     }
 
+    /*
+    * Tester functions
+    *
     private void testWidget(View widgetView){
         Log.d("Testing Widget","Currently testing " + widgetView.toString());
     }
@@ -112,6 +124,7 @@ public class HomeActivity extends Activity {
     private void testWidget(View widgetView, String additionalMessage){
         Log.d("Testing Widget", "Currently testing " + widgetView.toString() + ".\nCustom Message : "+additionalMessage);
     }
+    */
 
     private double getInputValue(){
         /*
