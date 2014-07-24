@@ -2,6 +2,7 @@ package com.example.ZenySavior;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
@@ -14,6 +15,8 @@ public class HomeActivity extends Activity {
     //consts
     //private final int N_DIGITS = 6; //Limiting how many digits
     private final double MAXIMUM_FACTOR = 1000; //Multiplier factor
+    private static DataHelper dataHelper;
+
 
 
     private List<NumberPicker> numberPickers = new ArrayList<NumberPicker>();
@@ -28,11 +31,15 @@ public class HomeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        //DEBUG:
+        Log.d("Density Size",getResources().getDisplayMetrics().toString());
+
         //Initialize Number Pickers
         initNumberPickers();
         //[Add] Button
         //The resource has been added to the xml
         ImageButton addButton = (ImageButton)findViewById(R.id.addValueToDaily);
+        ImageButton subtractButton = (ImageButton)findViewById(R.id.subtractValueDaily);
         final Button debugButton = (Button)findViewById(R.id.debugButton);
 
         //Initializes month
@@ -46,37 +53,39 @@ public class HomeActivity extends Activity {
         final TextView dailySpendingsLabel = (TextView)findViewById(R.id.dailySpendingsLabel);
         final TextView monthlySpendingsLabel = (TextView)findViewById(R.id.monthlySpendingsLabel);
 
+        //get DB
+        dataHelper = new DataHelper(this.getBaseContext());
+        dataHelper.debugGetAllRows();
+
         //Init the labels
         //if (has_entry_for_today)
         //set label as that
         //else
-        dailySpendingsLabel.setText("Today's Spendings: $0.00");
-        monthlySpendingsLabel.setText("This Month's Spendings: $0.00");
+
+        dailySpendingsLabel.setText("Today's Spendings: $" + dataHelper.searchValueForDate(curTime));
+        monthlySpendingsLabel.setText("This Month's Spendings: $" + dataHelper.getSumForMonth(curTime));
 
 
-        //get DB
-        final DataHelper dataHelper = new DataHelper(this.getBaseContext());
 
-        dataHelper.debugGetAllRows();
 
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                * If entry for today does not exist
-                *   Add entry to DB
-                * Else
-                *   Modify entry
-                * */
-                Date curTime = Calendar.getInstance().getTime();
-                 double providedVal = BigDecimal.valueOf(getInputValue()).setScale(2, BigDecimal.ROUND_UP).doubleValue();
-                try{
-                    dataHelper.insertValueForDate(curTime,providedVal);
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-                dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(getInputValue()).setScale(2, BigDecimal.ROUND_UP).toString());
+
+
+                double finalVal = performModificationToDaily(getInputValue());
+                dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(finalVal).setScale(2, BigDecimal.ROUND_UP).toString());
+                monthlySpendingsLabel.setText("This Month's Spendings: $" + performModificationToMonth());
+
+            }
+        });
+        subtractButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                double finalVal = performModificationToDaily(-getInputValue());
+                dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(finalVal).setScale(2, BigDecimal.ROUND_UP).toString());
+                monthlySpendingsLabel.setText("This Month's Spendings: $" + performModificationToMonth());
 
             }
         });
@@ -144,6 +153,24 @@ public class HomeActivity extends Activity {
             curVal += curValAtPicker;
         }
         return curVal;
+    }
+    private double performModificationToDaily(final double providedInput){
+        assert (dataHelper!=null);
+        Date curTime = Calendar.getInstance().getTime();
+        double newVal = BigDecimal.valueOf(providedInput).setScale(2, BigDecimal.ROUND_UP).doubleValue();
+        try{
+            newVal = dataHelper.insertValueForDate(curTime,newVal);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return newVal;
+
+    }
+
+    private double performModificationToMonth(){
+        assert (dataHelper!=null);
+        Date curTime = Calendar.getInstance().getTime();
+        return dataHelper.getSumForMonth(curTime);
     }
 
 }
