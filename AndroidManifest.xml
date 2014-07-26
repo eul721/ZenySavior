@@ -3,7 +3,7 @@
           package="com.example.ZenySavior"
           android:versionCode="1"
           android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="15"/>
+    <uses-sdk android:minSdkVersion="16"/>
     <supports-screens android:smallScreens="true"
                       android:normalScreens="true"
                       android:largeScreens="true"
@@ -18,6 +18,10 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".MonthView"
+                  >
+
         </activity>
     </application>
 </manifest>

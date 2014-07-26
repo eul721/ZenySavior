@@ -1,8 +1,12 @@
 package com.example.ZenySavior;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
@@ -18,7 +22,6 @@ public class HomeActivity extends Activity {
     private static DataHelper dataHelper;
 
 
-
     private List<NumberPicker> numberPickers = new ArrayList<NumberPicker>();
 
 
@@ -31,8 +34,7 @@ public class HomeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        //DEBUG:
-        Log.d("Density Size",getResources().getDisplayMetrics().toString());
+
 
         //Initialize Number Pickers
         initNumberPickers();
@@ -57,27 +59,17 @@ public class HomeActivity extends Activity {
         dataHelper = new DataHelper(this.getBaseContext());
         dataHelper.debugGetAllRows();
 
-        //Init the labels
-        //if (has_entry_for_today)
-        //set label as that
-        //else
+
 
         dailySpendingsLabel.setText("Today's Spendings: $" + dataHelper.searchValueForDate(curTime));
         monthlySpendingsLabel.setText("This Month's Spendings: $" + dataHelper.getSumForMonth(curTime));
 
-
-
-
-
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
                 double finalVal = performModificationToDaily(getInputValue());
                 dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(finalVal).setScale(2, BigDecimal.ROUND_UP).toString());
                 monthlySpendingsLabel.setText("This Month's Spendings: $" + performModificationToMonth());
-
             }
         });
         subtractButton.setOnClickListener(new View.OnClickListener() {
@@ -86,7 +78,6 @@ public class HomeActivity extends Activity {
                 double finalVal = performModificationToDaily(-getInputValue());
                 dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(finalVal).setScale(2, BigDecimal.ROUND_UP).toString());
                 monthlySpendingsLabel.setText("This Month's Spendings: $" + performModificationToMonth());
-
             }
         });
 
@@ -95,15 +86,34 @@ public class HomeActivity extends Activity {
             public void onClick(View view) {
                 DebugWindow debugWindow = new DebugWindow();
                 debugWindow.show(getFragmentManager(),"dialog");
-
-
-
             }
         });
 
 
 
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainmenu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case R.id.monthViewButton:{
+                Intent intent = new Intent(getBaseContext(),MonthView.class);
+                startActivity(intent);
+                return true;
+            }
+            default:{
+                return super.onOptionsItemSelected(item);
+            }
+        }
+    }
+
 
     //default the min and max vals for all numberpickers
     private void initNumberPickers(){
@@ -135,7 +145,7 @@ public class HomeActivity extends Activity {
     }
     */
 
-    private double getInputValue(){
+    protected double getInputValue(){
         /*
         [0] = *1000
         [1] = *100
@@ -172,5 +182,13 @@ public class HomeActivity extends Activity {
         Date curTime = Calendar.getInstance().getTime();
         return dataHelper.getSumForMonth(curTime);
     }
+
+    //FOR TESTING SUBCLASS
+    protected List<NumberPicker> getNumberPickers(){
+        return this.numberPickers;
+    }
+
+
+
 
 }

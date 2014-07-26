@@ -3,6 +3,7 @@
   <component name="FacetManager">
     <facet type="android" name="Android">
       <configuration>
+        <option name="PACK_TEST_CODE" value="true" />
         <option name="UPDATE_PROPERTY_FILES" value="true" />
       </configuration>
     </facet>
@@ -15,8 +16,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Caldroid" />
-    <orderEntry type="library" name="libs" level="project" />
+    <orderEntry type="module" module-name="ZenySavior" scope="PROVIDED" />
   </component>
 </module>
 

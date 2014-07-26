@@ -110,11 +110,8 @@ public class DataHelper extends SQLiteOpenHelper{
     }
 
     public double getSumForMonth(final Date inputDate){
-        Calendar calInstance = Calendar.getInstance();
-        calInstance.setTime(inputDate);
-        final int year = calInstance.get(Calendar.YEAR);
-        final int month = calInstance.get(Calendar.MONTH)+1;
-        Cursor resultCursor = retrieveCursorForCurMonthSearches(year,month);
+        final int[] vals = retrieveSeperateIntsPerDate(inputDate);
+        Cursor resultCursor = retrieveCursorForCurMonthSearches(vals[0],vals[1]);
         double sum = 0.00;
         if(resultCursor.getCount()>0){
             resultCursor.moveToFirst();
@@ -146,7 +143,6 @@ public class DataHelper extends SQLiteOpenHelper{
     }
 
     public double insertValueForDate(final Date inputDate, final double value) throws Exception{
-        //Todo: If already have value for date, update instead
         if(searchIfValueExistsForDate(inputDate)){
             try {
                 return updateValueForDate(inputDate, value);
