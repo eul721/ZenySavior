@@ -2,7 +2,9 @@ package com.example.ZenySavior;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,13 +16,20 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends Activity implements SharedPreferences.OnSharedPreferenceChangeListener{
+
 
     //consts
     //private final int N_DIGITS = 6; //Limiting how many digits
     private final double MAXIMUM_FACTOR = 1000; //Multiplier factor
     private static DataHelper dataHelper;
+    private static SharedPreferences sharedPreferences;
 
+    private double currentDaily;
+    private double currentMonthly;
+
+    private TextView dailySpendingsLabel;
+    private TextView monthlySpendingsLabel;
 
     private List<NumberPicker> numberPickers = new ArrayList<NumberPicker>();
 
@@ -52,17 +61,23 @@ public class HomeActivity extends Activity {
                 dateFormat);
 
         //text Labels
-        final TextView dailySpendingsLabel = (TextView)findViewById(R.id.dailySpendingsLabel);
-        final TextView monthlySpendingsLabel = (TextView)findViewById(R.id.monthlySpendingsLabel);
+        dailySpendingsLabel = (TextView)findViewById(R.id.dailySpendingsLabel);
+        monthlySpendingsLabel = (TextView)findViewById(R.id.monthlySpendingsLabel);
+
+        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
 
         //get DB
         dataHelper = new DataHelper(this.getBaseContext());
         dataHelper.debugGetAllRows();
 
 
-
-        dailySpendingsLabel.setText("Today's Spendings: $" + dataHelper.searchValueForDate(curTime));
-        monthlySpendingsLabel.setText("This Month's Spendings: $" + dataHelper.getSumForMonth(curTime));
+        currentDaily = dataHelper.searchValueForDate(curTime);
+        currentMonthly = dataHelper.getSumForMonth(curTime);
+        dailySpendingsLabel.setText("Today's Spendings: $" + currentDaily);
+        monthlySpendingsLabel.setText("This Month's Spendings: $" + currentMonthly);
+        adjustColorToBothLabels();
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +85,7 @@ public class HomeActivity extends Activity {
                 double finalVal = performModificationToDaily(getInputValue());
                 dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(finalVal).setScale(2, BigDecimal.ROUND_UP).toString());
                 monthlySpendingsLabel.setText("This Month's Spendings: $" + performModificationToMonth());
+                adjustColorToBothLabels();
             }
         });
         subtractButton.setOnClickListener(new View.OnClickListener() {
@@ -78,6 +94,7 @@ public class HomeActivity extends Activity {
                 double finalVal = performModificationToDaily(-getInputValue());
                 dailySpendingsLabel.setText("Today's Spendings: $" + BigDecimal.valueOf(finalVal).setScale(2, BigDecimal.ROUND_UP).toString());
                 monthlySpendingsLabel.setText("This Month's Spendings: $" + performModificationToMonth());
+                adjustColorToBothLabels();
             }
         });
 
@@ -108,6 +125,12 @@ public class HomeActivity extends Activity {
                 startActivity(intent);
                 return true;
             }
+            case R.id.settingsButton:{
+                Intent intent = new Intent(getBaseContext(),SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+
             default:{
                 return super.onOptionsItemSelected(item);
             }
@@ -167,7 +190,8 @@ public class HomeActivity extends Activity {
     private double performModificationToDaily(final double providedInput){
         assert (dataHelper!=null);
         Date curTime = Calendar.getInstance().getTime();
-        double newVal = BigDecimal.valueOf(providedInput).setScale(2, BigDecimal.ROUND_UP).doubleValue();
+        //normalize value before insertion
+        double newVal = normalizeTo2Decimals(providedInput);
         try{
             newVal = dataHelper.insertValueForDate(curTime,newVal);
         }catch(Exception e){
@@ -180,7 +204,35 @@ public class HomeActivity extends Activity {
     private double performModificationToMonth(){
         assert (dataHelper!=null);
         Date curTime = Calendar.getInstance().getTime();
-        return dataHelper.getSumForMonth(curTime);
+        return normalizeTo2Decimals(dataHelper.getSumForMonth(curTime));
+
+
+    }
+
+    private double normalizeTo2Decimals(double value){
+        return BigDecimal.valueOf(value).setScale(2,BigDecimal.ROUND_UP).doubleValue();
+    }
+
+    private void adjustColorToBothLabels(){
+        adjustColor(dailySpendingsLabel,currentDaily,
+                Float.parseFloat(sharedPreferences.getString(getResources().getString(R.string.daily_spendings_limit_key),"0.0")
+                                ));
+        adjustColor(monthlySpendingsLabel,currentMonthly,
+                Float.parseFloat(sharedPreferences.getString(getResources().getString(R.string.monthly_spendings_limit_key),"0.0")
+                                ));
+    }
+
+    private void adjustColor(TextView textview, final double input,final double limit){
+        if(input > limit){
+            textview.setTextColor(getResources().getColor(R.color.red));
+        }else{
+            textview.setTextColor(getResources().getColor(R.color.white));
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        adjustColorToBothLabels();
     }
 
     //FOR TESTING SUBCLASS

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/spending_settings_title"
+        android:key="spending_settings">
+        <EditTextPreference
+            android:key="@string/daily_spendings_limit_key"
+            android:title="@string/daily_spendings_limit_label"
+            android:numeric="decimal"
+            android:summary="@string/daily_spendings_limit_summary"
+            android:defaultValue="0.0"/>
+        <EditTextPreference
+            android:key="@string/monthly_spendings_limit_key"
+            android:title="@string/monthly_spendings_limit_label"
+            android:numeric="decimal"
+            android:summary="@string/monthly_spendings_limit_summary"
+            android:defaultValue="0.0"/>
+    </PreferenceCategory>
+
+
+
+</PreferenceScreen>

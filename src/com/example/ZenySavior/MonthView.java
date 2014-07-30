@@ -10,6 +10,7 @@ import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
 
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -20,6 +21,7 @@ public class MonthView extends FragmentActivity {
 
     private Date curDate;
 
+    private TextView currentlySelectedDay;
     private TextView selectedDaySpendingLabel;
     private TextView currentMonthSpendingLabel;
 
@@ -38,38 +40,26 @@ public class MonthView extends FragmentActivity {
         dataHelper = new DataHelper(getBaseContext());
 
         cal = Calendar.getInstance();
+        currentlySelectedDay = (TextView)findViewById(R.id.curDateLabel);
+        currentlySelectedDay.setTextColor(getResources().getColor(R.color.blue));
+        currentlySelectedDay.setShadowLayer((float)2.0,(float)1.0,(float)1.0,getResources().getColor(R.color.black));
         selectedDaySpendingLabel = (TextView)findViewById(R.id.selectedDaySpendingLabel);
         currentMonthSpendingLabel = (TextView)findViewById(R.id.currentMonthSpendingLabel);
 
         final MonthView instance = this;
 
         //CalendarUIWidget calWidget = new CalendarUIWidget(cal);
-        CaldroidFragment calFragment = new CaldroidFragment();
+       /* final CaldroidFragment calFragment = new CaldroidFragment();
         Bundle args = new Bundle();
         args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
         args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
-        calFragment.setArguments(args);
-        CaldroidListener listener = new CaldroidListener() {
-            @Override
-            public void onCaldroidViewCreated(){
-                changeDaily = true;
-                instance.changeDate(cal.getTime());
-            }
+        calFragment.setArguments(args);*/
+        /*CaldroidListener listener =
+        };*/
 
-            @Override
-            public void onSelectDate(Date date, View view) {
-                //MonthView monthview = (MonthView)view.getContext();
-                changeDaily = true;
-                instance.changeDate(date);
-            }
-            @Override
-            public void onChangeMonth(int month, int year){
-                cal.set(year,month-1,1); //the month here is the ACTUAL MONTH, not the 0-indexed month. Must adjust.
-                changeDaily = false;
-                instance.changeDate(cal.getTime());
-            }
-        };
-        calFragment.setCaldroidListener(listener);
+        //calFragment.setCaldroidListener(this.getClickListeners());
+
+        final CalendarUICaldroidFragment calFragment = new CalendarUICaldroidFragment(this,cal);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.caldroidWrapper, calFragment);
@@ -77,39 +67,30 @@ public class MonthView extends FragmentActivity {
 
 
 
-
-
-
-
-       /* calView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-            @Override
-            public void onSelectedDayChange(CalendarView calendarView, int i, int i2, int i3) {
-                cal.set(i,i2,i3);
-                //cal.set(Calendar.MONTH,i+1);
-                //cal.set(Calendar.DATE,i);
-
-                Logger.logWithTag("Selected Month Focus Color",calendarView.getFocusedChild().getClass().toString());
-                Logger.logWithTag("Day Changed", String.valueOf(i)+", "+String.valueOf(i2)+", "+String.valueOf(i3));
-                selectedDaySpendingLabel.setText(getString(R.string.daily_spending_prefix) + String.valueOf(dataHelper.searchValueForDate(cal.getTime())));
-                currentMonthSpendingLabel.setText(getString(R.string.monthly_spending_prefix) + String.valueOf(dataHelper.getSumForMonth(cal.getTime())));
-            }
-        });*/
-        //calView.setOn
-
-
     }
 
     public void changeDate(Date date){
+        changeDaily = true;
         this.curDate = date;
         updateLabels(date);
+    }
+
+    public void changeMonth(int year, int month){
+        changeDaily = false;
+        cal.set(year,month,1);
+        this.curDate = cal.getTime();
+        updateLabels(this.curDate);
     }
 
     private void updateLabels(Date date){
         if(cal.getTime()!=date)
             cal.setTime(date);
 
-        if(changeDaily)
+        if(changeDaily){
+            currentlySelectedDay.setText(DateFormat.getDateInstance().format(cal.getTime()));
             selectedDaySpendingLabel.setText(getString(R.string.daily_spending_prefix) + String.valueOf(dataHelper.searchValueForDate(cal.getTime())));
+        }
         currentMonthSpendingLabel.setText(getString(R.string.monthly_spending_prefix) + String.valueOf(dataHelper.getSumForMonth(cal.getTime())));
     }
+
 }

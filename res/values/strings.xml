@@ -6,4 +6,14 @@
     <string name="month_view">View Current Month</string>
     <string name="daily_spending_prefix">Daily Spendings : $</string>
     <string name="monthly_spending_prefix">Monthly Spendings : $</string>
+
+
+    <string name="daily_spendings_limit_key">daily_spending_limit</string>
+    <string name="monthly_spendings_limit_key">daily_spending_limit</string>
+    <string name="spending_settings_title">Spending Thresholds</string>
+    <string name="monthly_spendings_limit_label">Monthly Spending Limits</string>
+    <string name="monthly_spendings_limit_summary">A limit for your monthly spending. This limit will adjust the notification\'s behaviors.</string>
+    <string name="daily_spendings_limit_label">Daily Spending Limits</string>
+    <string name="daily_spendings_limit_summary">A limit for your daily spending. This limit will adjust the notification\'s behaviors.</string>
+
 </resources>
