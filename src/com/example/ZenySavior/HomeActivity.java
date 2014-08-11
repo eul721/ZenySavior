@@ -75,8 +75,8 @@ public class HomeActivity extends Activity implements SharedPreferences.OnShared
 
         currentDaily = dataHelper.searchValueForDate(curTime);
         currentMonthly = dataHelper.getSumForMonth(curTime);
-        dailySpendingsLabel.setText("Today's Spendings: $" + currentDaily);
-        monthlySpendingsLabel.setText("This Month's Spendings: $" + currentMonthly);
+        dailySpendingsLabel.setText("Today's Spendings: $" + normalizeTo2Decimals(currentDaily));
+        monthlySpendingsLabel.setText("This Month's Spendings: $" + normalizeTo2Decimals(currentMonthly));
         adjustColorToBothLabels();
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -127,6 +127,11 @@ public class HomeActivity extends Activity implements SharedPreferences.OnShared
             }
             case R.id.settingsButton:{
                 Intent intent = new Intent(getBaseContext(),SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            case R.id.viewGraphButton:{
+                Intent intent = new Intent(getBaseContext(),GraphActivity.class);
                 startActivity(intent);
                 return true;
             }

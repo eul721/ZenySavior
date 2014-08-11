@@ -7,5 +7,8 @@
     <item android:id="@+id/monthViewButton"
           android:title="@string/month_view"
           android:showAsAction="never"/>
+    <item android:id="@+id/viewGraphButton"
+          android:title="@string/view_graph_button_label"
+          android:showAsAction="never"/>
 
 </menu>

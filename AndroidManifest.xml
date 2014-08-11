@@ -26,5 +26,6 @@
         <activity android:name=".SettingsActivity">
 
         </activity>
+        <activity android:name=".GraphActivity" android:label="graph views"/>
     </application>
 </manifest>

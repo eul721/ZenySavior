@@ -46,16 +46,7 @@ public class MonthView extends FragmentActivity {
         selectedDaySpendingLabel = (TextView)findViewById(R.id.selectedDaySpendingLabel);
         currentMonthSpendingLabel = (TextView)findViewById(R.id.currentMonthSpendingLabel);
 
-        final MonthView instance = this;
 
-        //CalendarUIWidget calWidget = new CalendarUIWidget(cal);
-       /* final CaldroidFragment calFragment = new CaldroidFragment();
-        Bundle args = new Bundle();
-        args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
-        args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
-        calFragment.setArguments(args);*/
-        /*CaldroidListener listener =
-        };*/
 
         //calFragment.setCaldroidListener(this.getClickListeners());
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -22,6 +23,7 @@ import java.util.*;
  * Also provides date computations
  */
 public class DataHelper extends SQLiteOpenHelper{
+
     private static final int DB_VERSION = 3;
     private static final String DB_TABLE_NAME = "spendings";
     private static final String DB_TABLE_CREATE =
@@ -48,6 +50,8 @@ public class DataHelper extends SQLiteOpenHelper{
 
         super(context,"ZenySaviorDB",null,DB_VERSION);
     }
+
+
 
     @Override
     public void onCreate(SQLiteDatabase db){
@@ -202,6 +206,7 @@ public class DataHelper extends SQLiteOpenHelper{
         return new String[]{KEY_ID,KEY_YEAR,KEY_MONTH,KEY_DATE,KEY_SPENT_VALUE};
     }
 
+    //The following is used to create a debug list view
     public ArrayList<TableRow> getAllRowsInTableRowArrayList(Context context){
         ArrayList<TableRow> listOfTableRows = new ArrayList<TableRow>();
 
@@ -217,6 +222,25 @@ public class DataHelper extends SQLiteOpenHelper{
             listOfTableRows.add(newTableRow);
         }
         return listOfTableRows;
+    }
+
+    public ArrayList<DataTableRow> getAllRowsInMonth(int year, int month){
+        Cursor cursor = retrieveCursorForCurMonthSearches(year,month);
+        if(cursor.getCount()>0){
+            ArrayList<DataTableRow> arrList = new ArrayList<DataTableRow>();
+            cursor.moveToFirst();
+            do{
+                final int id = cursor.getInt(cursor.getColumnIndex("id"));
+                //final int year = cursor.getInt(cursor.getColumnIndex("year"));
+                //final int month = cursor.getInt(cursor.getColumnIndex("month"));
+                final int date = cursor.getInt(cursor.getColumnIndex("date"));
+                final double spentValue = cursor.getDouble(cursor.getColumnIndex("spentValue"));
+
+                arrList.add(new DataTableRow(id,year,month,date,spentValue));
+            }while(cursor.moveToNext());
+            return arrList;
+        }else return null;
+
     }
 
     //DEBUG ROWS

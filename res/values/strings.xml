@@ -4,6 +4,7 @@
     <string name="Add">Add</string>
     <string name="settings_title">Settings</string>
     <string name="month_view">View Current Month</string>
+    <string name="view_graph_button_label">View Graphs</string>
     <string name="daily_spending_prefix">Daily Spendings : $</string>
     <string name="monthly_spending_prefix">Monthly Spendings : $</string>
 
